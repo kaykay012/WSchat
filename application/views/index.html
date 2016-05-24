@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="js/jquery.js"></script>
+<script src="js/jquery.json.js"></script>
+<script type="text/javascript">
+var name = '';
+function reg(name) {
+	if(!name){
+		name = reg(prompt("请输入您的名字",""));
+	}
+		
+	return name;
+}
+
+var ws = {};
+var wsServer = 'ws://139.129.58.85:9502';
+
+ws = new WebSocket(wsServer);
+ws.onopen = function (evt) {
+    console.log("Connected to WebSocket server.");
+
+    var c = {};c.info = {};
+    c.command = 'reg';
+    c.info.name = name;
+
+    ws.send($.toJSON(c) + "\r\n");
+};
+
+ws.onclose = function (evt) {
+    console.log("Disconnected");
+};
+
+ws.onmessage = function (evt) {
+    console.log('Retrieved data from server: ' + evt.data);
+    var data = $.evalJSON(evt.data);    
+
+    switch (data.command){
+    	case 'online':
+    		var content = '<li><p><span>' + data.who.name + ' 上线了 [ '+ data.sendtime +' ] </span></p>'
+			$(".stdout ul").append(content);
+
+			var op = '';
+			op += '<option value="' + data.who.fd +'">' + data.who.name + '</option>';
+			$(".stdin select").append(op);			
+    		break;
+		case 'offline':
+    		var content = '<li><p><span>' + data.who.name + ' 下线了 [ '+ data.sendtime +' ] </span></p>'
+			$(".stdout ul").append(content);
+
+			$.each($(".stdin select option"), function(i, val) {
+				if(data.who.fd == val.value) {
+					$(this).remove();
+				}
+			})
+    		break;
+    	case 'sayall':
+	    	var content = '<li><p><span>' + data.info.who.name + ' 对大家说： [ '+ data.sendtime +' ] </span>' + data.info.msg + '</p></li>'
+			$(".stdout ul").append(content);
+	    	break;
+    	case 'sayto':
+    		var content = '<li><p><span>' + data.info.who.name + ' 对你说： [ '+ data.sendtime +' ] </span>' + data.info.msg + '</p></li>'
+			$(".stdout ul").append(content);
+    		break;
+	    case 'reg':
+	    	console.log(data.msg);
+	    	break;
+    	case 'clientlist':
+    		var op = '';
+    		$.each(data.fdlist, function(i, val) {
+    			op += '<option value="' + val.fd +'">' + val.name + '</option>';
+    		})
+    		$(".stdin select").append(op);
+    		break;
+    	default:;
+    }
+};
+
+ws.onerror = function (evt, e) {
+    console.log('Error occured: ' + evt.data);
+};
+
+
+$(function(){
+	name = reg(prompt("请输入您的名字",""));
+
+	var content = '<li><p><span>Kenith 对你说：</span>你好，'+name+'</p></li>';	
+	$(".stdout ul").append(content);
+
+	$(".stdin textarea").focus();
+
+	$("#SEND").click(function() {
+		var c = $(".stdin textarea").val();
+		sendMsg(c);
+	});
+})
+document.onkeydown = function (e) {
+    var ev = document.all ? window.event : e;
+    if (ev.keyCode == 13) {
+        var c = $(".stdin textarea").val();
+		sendMsg(c);
+        return false;
+    } else {    	
+        return true;
+    }
+};
+function sendMsg(content) {
+	var c = {};c.info = {};
+	
+    content = trim(content)
+    if(!content) {
+    	$(".stdin textarea").addClass('stdinerr');
+    }else{
+    	$(".stdin textarea").removeClass('stdinerr');
+    }
+
+    c.info.name = name;
+    
+	var opval = $('.stdin select option:selected').val();
+	if(opval == -1){
+		c.command = 'sayall';
+		c.info.msg = content;
+	} else if(opval > -1) {
+		c.command = 'sayto';
+		c.info.to = opval;
+		c.info.msg = content;
+	}
+	ws.send($.toJSON(c) + "\r\n");
+	var c = $(".stdin textarea").val('');
+
+	var content = '<li class="self"><p>'+ content +'</p></li>'
+	$(".stdout ul").append(content);
+}
+function appednStr(obj) {
+
+}
+function trim(str){
+	return str.replace(/(^\s*)|(\s*$)/g, "");
+}
+</script>
+</head>
+<body>
+<h3 align="center">Kenith's Chat Room</h3>
+<div class="stdout">
+<ul>
+	<!-- <li><p><span>Kenith对大家说：</span>大家好，请多多关照！<a>'+ data.sendtime +'</a></p></li> -->
+	<!-- <li class="self"><p>大家好，请多多关照！</p></li> -->
+</ul>
+</div>
+<br/>
+<div class="stdin">
+	<textarea name="content" placeholder="向小伙伴们打声招呼吧"></textarea><br />
+	发送给：<select name="fdlist">
+	<option value="-1"> 所有人 </option>
+	</select>
+	<button id="SEND"> 发送 </button>	
+</div>
+
+</body>
+</html>

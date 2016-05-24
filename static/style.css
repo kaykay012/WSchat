@@ -1,0 +1,32 @@
+div{font-size:12px;font-family: "微软雅黑";}
+a,a:hover{text-decoration: none;color:gray;}
+div{margin:0 auto;}
+.stdout{width:600px; height:300px; border:1px solid gray; overflow:auto; position: relative; padding:20px 0;}
+.stdout ul{display: block;padding-left: 20px;width: 90%;}
+.stdout ul li p {width: 100%;word-wrap: break-word;}
+.stdout ul li p img{max-width: 90%;}
+.stdout ul li p span{color:gray; display: block; margin-bottom: 5px;}
+.stdout ul li p span.online{color:green;}
+.stdout ul li p span.offline{text-decoration: line-through;}
+.stdout ul li p span.sayto{color:#9966CC;}
+.stdout ul li a{float:right;}
+
+.stdout ul li.self{list-style: none;}
+.stdout ul li.self p{text-align: right;margin-right: 5px; border: 1px dotted #ccc;padding: 5px 0;}
+
+.stdin{width:600px; height:auto; border:1px solid #fff;}
+.stdin textarea{width:596px; height:100px;}
+.stdin .stdinerr{border:1px solid red;}
+.stdin .picAndface{width:100%; height: 30px; line-height: 30px;}
+.stdin .picAndface .pic{float:left;width:100px;}
+.stdin .picAndface .face{float:left;width:80px;}
+
+.stdout ul li p.border_dotted{border-bottom:1px dotted gray; padding-bottom: 10px;}
+
+#MORE{text-decoration: underline;color:blue; position: absolute;top:0; display: block; width:100%; text-align: center; line-height: 30px; cursor: pointer;}
+#facebox{background:#fff;}
+#facebox td{width:30px;height:30px;cursor: pointer;}
+@media screen and (min-width: 100px) and (max-device-width: 600px){
+    .stdout,.stdin{width:100%;}
+    .stdin textarea{width:100%;}
+}
